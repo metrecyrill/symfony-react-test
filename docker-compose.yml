@@ -1,0 +1,37 @@
+version: '3.9'
+
+services:
+  php:
+    build:
+      context: ./docker/php
+    volumes:
+      - ./backend:/var/www/html
+    restart: unless-stopped
+    depends_on:
+      - postgres
+
+  nginx:
+    image: nginx:latest
+    ports:
+      - "80:80"
+    volumes:
+      - ./backend:/var/www/html
+      - ./docker/nginx/conf.d:/etc/nginx/conf.d
+    depends_on:
+      - php
+
+  postgres:
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: postgres
+      PG_DATA: /var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./docker/postgres/pgdata:/var/lib/postgresql/data
+    restart: always
+
+volumes:
+  pgdata:
